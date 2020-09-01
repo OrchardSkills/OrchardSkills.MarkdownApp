@@ -1,0 +1,123 @@
+﻿@using System.Text.Json
+@using System.Text.Json.Serialization;
+@page "/counter"
+
+<h1>Counter</h1>
+
+<p>Current count: @currentCount</p>
+
+@((MarkupString)htmlMarkdown)
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+@code {
+
+
+    public class Employee
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string EmployeeId { get; set; }
+        public Address Address { get; set; }
+    }
+ 
+    public class Address
+    {
+        public string ZipCode { get; set; }
+        public string State { get; set; }
+        public string Country { get; set; }
+    }
+
+    public class ApiGraphQL
+    {
+        public data data { get; set; }
+    }
+
+    public class data
+    {
+        public blogPost[] blogPost { get; set; }
+    }
+
+    public class blogPost
+    {
+        public string displayText { get; set; }
+
+        public string subtitle { get; set; }
+
+        public string author { get; set; }
+
+        public DateTime publishedUtc { get; set; }
+
+        public markdownBody markdownBody { get; set; }
+    }
+
+    public class markdownBody
+    {
+        public string markdown { get; set; }
+    }
+
+    private int currentCount = 0;
+    private string htmlMarkdown;
+
+    private void IncrementCount()
+    {
+        string markdown =   "<p></p>";
+@*      
+        Employee empDetails = new Employee
+        {
+            FirstName = "ABCD",
+            LastName = "TEST",
+            Address = new Address { Country = "USA", State = "CA", ZipCode = "1234" },
+            EmployeeId = "1111"
+        };
+*@
+        ApiGraphQL apiGraphQL = new ApiGraphQL
+        {
+            data = new data
+            {
+                blogPost = new blogPost[]
+                {
+                    new blogPost()
+                    {
+                      displayText = "Man must explore, and this is exploration at its greatest",
+                      subtitle = "Problems look mighty small from 150 miles up",
+                      author = "sales",
+                      publishedUtc =  DateTime.Parse("2020-08-30T01:21:36.7656783Z"),
+                      markdownBody = new markdownBody
+                      {
+                        markdown = "Never in all their history have men been able truly to conceive of the world as one: a single sphere, a globe, having the qualities of a globe, a round earth in which all the directions eventually meet, in which there is no center because every point, or none, is center \u2014 an equal earth which all men occupy as equals. The airman's earth, if free men make it, will be truly round: a globe in practice, not in theory.\n\nScience cuts two ways, of course; its products can be used for both good and evil. But there's no turning back from science. The early warnings about technological dangers also come from science.\n\nWhat was most significant about the lunar voyage was not that man set foot on the Moon but that they set eye on the earth.\n\nA Chinese tale tells of some men sent to harm a young girl who, upon seeing her beauty, become her protectors rather than her violators. That's how I felt seeing the Earth for the first time. I could not help but love and cherish her.\n\nFor those who have seen the Earth from space, and for the hundreds and perhaps thousands more who will, the experience most certainly changes your perspective. The things that we share in our world are far more valuable than those which divide us."
+                      }
+                    }                
+                }
+            }
+        };
+
+        string serializedApiGraphQL =  JsonSerializer.Serialize(apiGraphQL);
+        ApiGraphQL apiGraphQLCopy = JsonSerializer.Deserialize<ApiGraphQL>(serializedApiGraphQL);
+        if (apiGraphQL.data.blogPost.Length > 0)
+        {
+            markdown = apiGraphQL.data.blogPost[0].markdownBody.markdown;
+            htmlMarkdown = "<p>" + Markdig.Markdown.ToHtml(markdown) + "</p>";
+        }
+        //string jsonOutPut = JsonSerializer.Serialize(empDetails);
+        //string serializedEmployee = @"{""FirstName"":""ABCD"",""LastName"":""TEST"",""EmployeeId"":""1111"",""Address"":{""ZipCode"":""1234"",""State"":""CA"",""Country"":""USA""}}";
+        //Employee employee =  JsonSerializer.Deserialize<Employee>(serializedEmployee);
+        //string serializedData = @"{""data"":""blogPost""}";
+        //string serializedApiGraphQL = @"{""data"":{""blogPost"":[{""displayText"":""Man must explore, and this is exploration at its greatest"",""subtitle"":""Problems look mighty small from 150 miles up"",""author"":""sales"",""publishedUtc"":""2020-08-30T01:21:36.7656783Z"",""markdownBody"":{""markdown"":""Never in all their history have men been able truly to conceive of the world as one: a single sphere, a globe, having the qualities of a globe, a round earth in which all the directions eventually meet, in which there is no center because every point, or none, is center \u2014 an equal earth which all men occupy as equals. The airman's earth, if free men make it, will be truly round: a globe in practice, not in theory.\n\nScience cuts two ways, of course; its products can be used for both good and evil. But there's no turning back from science. The early warnings about technological dangers also come from science.\n\nWhat was most significant about the lunar voyage was not that man set foot on the Moon but that they set eye on the earth.\n\nA Chinese tale tells of some men sent to harm a young girl who, upon seeing her beauty, become her protectors rather than her violators. That's how I felt seeing the Earth for the first time. I could not help but love and cherish her.\n\nFor those who have seen the Earth from space, and for the hundreds and perhaps thousands more who will, the experience most certainly changes your perspective. The things that we share in our world are far more valuable than those which divide us.""}}]}}";
+        
+        currentCount++;
+    }
+
+    private void find (Dictionary<string,object> items)
+    {
+        foreach(var item in items)
+        {
+            Console.WriteLine($"{item.Key} -> {item.Value}");
+            string json = item.Value.ToString();
+            if (json.Length > 0)
+            {
+              find (JsonSerializer.Deserialize<Dictionary<string,object>>(json));
+            }
+        }
+    }
+}
